@@ -1,6 +1,9 @@
 import React from "react";
+import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
+import RestaurantDetail from "./pages/RestaurantDetail";
+import MyBookings from "./pages/MyBookings";
 
 export default function App() {
   return (
@@ -8,7 +11,11 @@ export default function App() {
       <Navbar />
       {/* 導覽列高度約 96px，padding-top 保留空間 */}
       <div className="pt-24">
-        <HomePage />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/restaurant/:id" element={<RestaurantDetail />} />
+          <Route path="/bookings" element={<MyBookings />} />
+        </Routes>
       </div>
     </div>
   );

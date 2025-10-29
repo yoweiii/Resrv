@@ -1,9 +1,11 @@
 import React, { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import RestaurantCard from "./RestaurantCard";
 
 export default function CarouselSection({ title, restaurants }) {
 
   const scrollRef = useRef(null);
+  const navigate = useNavigate();
 
   const scrollByOffset = (offset) => {
     if (scrollRef.current) {
@@ -36,7 +38,7 @@ export default function CarouselSection({ title, restaurants }) {
         >
           {restaurants.map((item, index) => (
             <div key={index} className="flex-shrink-0 w-64">
-              <RestaurantCard {...item} />
+              <RestaurantCard {...item} onClick={() => navigate(`/restaurant/${item.id}`)} />
             </div>
           ))}
         </div>

@@ -1,6 +1,9 @@
 import React from "react";
+import { useAppState } from "../context/AppState";
+import { useNavigate } from "react-router-dom";
 
 export default function RestaurantCard({
+  id,
   name,
   image,
   location,
@@ -10,6 +13,8 @@ export default function RestaurantCard({
   times,
   onClick,
 }) {
+  const { isFavorite, toggleFavorite } = useAppState();
+  const navigate = useNavigate();
   const stars = Array.from({ length: 5 }, (_, i) => (
     <span
       key={i}
@@ -21,9 +26,17 @@ export default function RestaurantCard({
 
   return (
     <div
-      className="bg-white rounded-lg shadow hover:shadow-lg transition transform hover:scale-105 cursor-pointer"
+      className="bg-white rounded-lg shadow hover:shadow-lg transition transform hover:scale-105 cursor-pointer relative"
       onClick={onClick}
     >
+      <button
+        type="button"
+        aria-label="favorite"
+        className={`absolute top-2 right-2 rounded-full p-2 text-sm ${isFavorite(id) ? 'text-[#b22a2a] bg-white' : 'text-gray-500 bg-white/90'} hover:text-[#b22a2a]`}
+        onClick={(e) => { e.stopPropagation(); toggleFavorite(id); }}
+      >
+        {isFavorite(id) ? '❤' : '♡'}
+      </button>
       <img
         src={image}
         alt={name}
@@ -46,6 +59,7 @@ export default function RestaurantCard({
             <button
               key={idx}
               className="border border-[#b22a2a] text-[#b22a2a] px-2 py-1 text-xs rounded hover:bg-[#e4b326] hover:text-white transition"
+              onClick={(e) => { e.stopPropagation(); navigate(`/restaurant/${id}?time=${encodeURIComponent(t)}`); }}
             >
               {t}
             </button>
