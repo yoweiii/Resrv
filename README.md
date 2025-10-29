@@ -69,9 +69,3 @@ Resrv/
 3. 進行修改後提交：`git commit -m "描述你的修改"`
 4. 推送到 GitHub：`git push origin your-feature-branch`
 5. 發起 Pull Request
-
-## 📄 License
-MIT License
-
-## 👥 貢獻者
-歡迎提交 Issue 或 Pull Request！
