@@ -1,11 +1,11 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/Navbar.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import LoginRegisterModal from "./components/LoginRegisterModal.jsx";
-import HomePage from "./pages/HomePage";
-import RestaurantDetail from "./pages/RestaurantDetail";
-import MyBookings from "./pages/MyBookings";
+import HomePage from "./pages/HomePage.jsx";
+import RestaurantDetail from "./pages/RestaurantDetail.jsx";
+import MyBookings from "./pages/MyBookings.jsx";
 
 export default function App() {
   return (

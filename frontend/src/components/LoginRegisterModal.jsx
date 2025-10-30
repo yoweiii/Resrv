@@ -1,7 +1,5 @@
-import React from "react"
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
-// import { api } from "../../utils/api.js"; // 之後接後端
 
 export default function AuthModal() {
   const { authOpen, closeAuth, authMode, openAuth, setUser } = useAuth();
@@ -9,6 +7,7 @@ export default function AuthModal() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState(""); 
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
@@ -17,6 +16,7 @@ export default function AuthModal() {
     if (authOpen) {
       setEmail("");
       setPassword("");
+      setName("");
       setErr("");
       setLoading(false);
     }
@@ -40,17 +40,18 @@ export default function AuthModal() {
 
     if (!/^\S+@\S+\.\S+$/.test(email)) return setErr("請輸入有效的 Email");
     if (password.length < 6) return setErr("密碼至少 6 碼");
+    if (!isLogin && name.trim() === "") return setErr("請輸入姓名");
 
     try {
       setLoading(true);
       // 之後接 FastAPI：
       // const path = authMode === "login" ? "/auth/login" : "/auth/register";
-      // const data = await api(path, { method: "POST", body: { email, password }});
+      // const data = await api(path, { method: "POST", body: { name, email, password }});
       // setUser(data.user);
 
       // demo
       setTimeout(() => {
-        setUser({ id: 1, name: "Demo User", email });
+        setUser({ id: 1, name: name || "Demo User", email });
         setLoading(false);
         closeAuth();
       }, 600);
@@ -88,6 +89,19 @@ export default function AuthModal() {
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
+          {!isLogin && (
+            <div>
+              <label className="block text-sm font-medium mb-1">姓名</label>
+              <input
+                type="text"
+                className="w-full border rounded px-3 py-2 outline-none"
+                placeholder="請輸入姓名"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
             <input
