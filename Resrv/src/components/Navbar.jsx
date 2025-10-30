@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import PeopleSelect from "./PeopleSelect"; // 引入共用元件
 import restaurants from "../data/restaurants";
+import LoginButton from "./LoginButton";
 
 function getTaiwanTimeNow() {
   const now = new Date();
@@ -212,9 +213,7 @@ export default function Navbar() {
           <button className="text-sm text-[#b22a2a] hover:text-[#e4b326]">
             加入獎勵
           </button>
-          <button className="bg-[#e4b326] px-3 py-1 rounded-md text-sm text-white hover:bg-[#b22a2a] transition">
-            登入
-          </button>
+          <LoginButton />
         </div>
       </div>
     </nav>
