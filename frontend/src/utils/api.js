@@ -1,12 +1,40 @@
-export async function api(path, options = {}) {
-  const base = "http://127.0.0.1:8000"; // 先固定用本機後端
+const API_BASE = import.meta.env.PROD
+  ? "https://your-vercel-backend.vercel.app"
+  : "http://127.0.0.1:8000";
 
-  const res = await fetch(base + path, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-    body: options.body ? JSON.stringify(options.body) : undefined,
+export const getToken = () => localStorage.getItem("token") ?? "";
+export const setToken = (t) => localStorage.setItem("token", t);
+export const clearToken = () => localStorage.removeItem("token");
+
+
+export async function api(path, { method = "GET", body, token, headers } = {}) {
+  const authToken = token ?? getToken(); 
+
+  const res = await fetch(API_BASE + path, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      ...(headers || {}),
+    },
+    body: body ? JSON.stringify(body) : undefined,
   });
+
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
+export const authApi = {
+  register: (payload) =>
+    api("/auth/register", { method: "POST", body: payload }),
+
+  login: async (payload) => {
+    const data = await api("/auth/login", { method: "POST", body: payload });
+    setToken(data.access_token); 
+    return data;
+  },
+
+  me: () => api("/auth/me"),
+
+  logout: () => clearToken(),
+};

@@ -7,9 +7,9 @@ from jose import jwt, JWTError
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
-from ..database import get_db
-from ..models import User
-from ..schemas import RegisterIn, LoginIn, UserOut, TokenOut
+from database import get_db 
+from models import User
+from schemas import RegisterIn, LoginIn, UserOut, TokenOut
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -17,19 +17,23 @@ SECRET_KEY = os.getenv("SECRET_KEY", "change_me")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_MIN = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
 
-pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+pwd = CryptContext(schemes=["argon2"], deprecated="auto")
+print("Hash scheme:", pwd.schemes())
 oauth2 = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-
 def create_token(sub: int) -> str:
-    payload = {"sub": sub, "exp": datetime.utcnow() + timedelta(minutes=ACCESS_MIN)}
+    payload = {
+        "sub": str(sub),
+        "exp": datetime.utcnow() + timedelta(minutes=ACCESS_MIN),
+    }
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 def current_user(token: str = Depends(oauth2), db: Session = Depends(get_db)) -> User:
     try:
         data = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         uid = data.get("sub")
-    except JWTError:
+    except JWTError as e:
         uid = None
     if uid is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="未授權")
@@ -41,6 +45,8 @@ def current_user(token: str = Depends(oauth2), db: Session = Depends(get_db)) ->
 # Routes
 @router.post("/register", response_model=UserOut, status_code=201)
 def register(body: RegisterIn, db: Session = Depends(get_db)):
+    if len(body.password) > 72:  
+        raise HTTPException(status_code=400, detail="密碼太長")
     if db.query(User).filter(User.email == body.email).first():
         raise HTTPException(status_code=400, detail="Email 已註冊")
     user = User(name=body.name, email=body.email, password=pwd.hash(body.password))

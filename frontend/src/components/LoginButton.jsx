@@ -1,20 +1,29 @@
-import { useAuth } from "../context/AuthContext";
-import React from "react"
+import React from "react";
+import { useAuth } from "../context/AuthContext.jsx";
 
-export default function LoginButton({ className = "" }) {
-  const { openAuth, user } = useAuth();
+export default function LoginButton() {
+  const { user, openAuth, logout } = useAuth();
 
-  if (user) {
-    return <div className="text-sm text-gray-700">嗨，{user.name}</div>;
+  if (!user) {
+    return (
+      <button
+        className="bg-[#e4b326] px-3 py-1 rounded-md text-sm text-white hover:bg-[#b22a2a] transition"
+        onClick={() => openAuth("login")}
+      >
+        登入
+      </button>
+    );
   }
 
   return (
-    <button
-      className={`bg-[#e4b326] px-3 py-1 rounded-md text-sm text-white hover:bg-[#b22a2a] transition ${className}`}
-      onClick={() => openAuth("login")}
-      type="button"
-    >
-      登入
-    </button>
+    <div className="flex items-center gap-2">
+      <span className="text-sm text-gray-700">Hi, {user.name}</span>
+      <button
+        className="px-3 py-1 rounded-md text-sm border hover:bg-gray-100"
+        onClick={logout}
+      >
+        登出
+      </button>
+    </div>
   );
 }
