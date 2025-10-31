@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useToast } from "../context/ToastContext";
 
 export default function LoginRegisterModal() {
+  const { showToast } = useToast();
   const { authOpen, closeAuth, authMode, openAuth, register, login } = useAuth();
   const panelRef = useRef(null);
 
@@ -43,6 +45,7 @@ export default function LoginRegisterModal() {
         await login({ email, password });
       } else {
         await register({ name, email, password });
+        showToast("註冊成功，請重新登入");
         openAuth("login");
         setLoading(false);
         return;

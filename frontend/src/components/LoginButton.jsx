@@ -19,7 +19,7 @@ export default function LoginButton() {
     <div className="flex items-center gap-2">
       <span className="text-sm text-gray-700">Hi, {user.name}</span>
       <button
-        className="px-3 py-1 rounded-md text-sm border hover:bg-gray-100"
+        className="px-3 py-1 rounded-md text-sm border border-white hover:bg-gray-100"
         onClick={logout}
       >
         登出
