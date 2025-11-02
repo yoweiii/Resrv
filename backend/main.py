@@ -5,7 +5,7 @@ from typing import Generator
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
-
+from database import Base, init_engine
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -57,6 +57,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def root():
     return {"msg": "Backend running successfully!"}
@@ -64,6 +65,11 @@ def root():
 @app.get("/favicon.ico")
 def favicon():
     return {}, 204
+
+@app.on_event("startup")
+def startup_event():
+    init_engine()             
+    Base.metadata.create_all(bind=_engine) 
 
 app.include_router(auth.router)
 

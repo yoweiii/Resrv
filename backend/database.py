@@ -1,18 +1,38 @@
-from dotenv import load_dotenv
+# database.py
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from typing import Generator
 
-load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Dependency
-def get_db():
-    db = SessionLocal()
+_engine = None
+_SessionLocal = None
+
+
+def init_engine():
+    global _engine, _SessionLocal
+    if _engine is not None:
+        return
+
+    db_url = os.getenv("DATABASE_URL")
+    if not db_url:
+        raise RuntimeError("Missing environment variable: DATABASE_URL")
+
+    connect_args = {"sslmode": "require"} if "sslmode=" not in db_url else {}
+
+    _engine = create_engine(
+        db_url,
+        pool_pre_ping=True,
+        connect_args=connect_args
+    )
+    _SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
+
+
+def get_db() -> Generator:
+    if _SessionLocal is None:
+        init_engine()
+    db = _SessionLocal()
     try:
         yield db
     finally:
