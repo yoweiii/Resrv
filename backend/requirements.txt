@@ -6,4 +6,3 @@ psycopg[binary]
 passlib[bcrypt]
 python-jose[cryptography]
 python-multipart
-vercel-asgi
