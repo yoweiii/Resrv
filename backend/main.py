@@ -1,58 +1,22 @@
-
-import os
-from typing import Generator
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
-from database import Base, init_engine
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
+from database import Base, init_engine, get_engine
 import models
 import auth
 
-
-_engine = None
-_SessionLocal = None
-
-def _init_db_if_needed():
-    global _engine, _SessionLocal
-    if _engine is not None:
-        return
-
-    db_url = os.getenv("DATABASE_URL")
-    if not db_url:
-
-        raise RuntimeError("Missing env var: DATABASE_URL")
-
-    connect_args = {"sslmode": "require"} if "sslmode=" not in db_url else {}
-    _engine = create_engine(db_url, pool_pre_ping=True, connect_args=connect_args)
-    _SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
-
-
-    models.Base.metadata.create_all(bind=_engine)
-
-def get_db() -> Generator:
-    _init_db_if_needed()
-    db = _SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
 app = FastAPI()
 
-origins = [
+ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://resrv.vercel.app",   
+    "https://resrv.vercel.app", 
 ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_origin_regex=r"^https://resrv(-[a-z0-9-]+)?\.vercel\.app$",
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -64,15 +28,17 @@ app.add_middleware(
 def root():
     return {"msg": "Backend running successfully!"}
 
-@app.get("/favicon.ico")
+@app.get("/favicon.ico", include_in_schema=False)
 def favicon():
     return {}, 204
 
-@app.on_event("startup")
-def startup_event():
-    init_engine()             
-    Base.metadata.create_all(bind=_engine) 
 
+@app.on_event("startup")
+def on_startup():
+    init_engine()
+    Base.metadata.create_all(bind=get_engine())
+
+# Routers
 app.include_router(auth.router)
 
 def custom_openapi():
