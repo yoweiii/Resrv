@@ -18,7 +18,6 @@ def init_engine():
     if not db_url:
         raise RuntimeError("Missing environment variable: DATABASE_URL")
 
-    # For Neon/Supabase etc.
     connect_args = {"sslmode": "require"} if "sslmode=" not in db_url else {}
 
     _engine = create_engine(db_url, pool_pre_ping=True, connect_args=connect_args)
