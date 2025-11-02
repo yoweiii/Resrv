@@ -1,6 +1,4 @@
-const API_BASE = import.meta.env.PROD
-  ? "https://your-vercel-backend.vercel.app"
-  : "http://127.0.0.1:8000";
+const API_BASE = import.meta.env.VITE_API_BASE;
 
 export const getToken = () => localStorage.getItem("token") ?? "";
 export const setToken = (t) => localStorage.setItem("token", t);
