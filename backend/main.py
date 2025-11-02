@@ -1,14 +1,53 @@
+
+import os
+from typing import Generator
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
-import auth 
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+import models
+import auth
+
+
+_engine = None
+_SessionLocal = None
+
+def _init_db_if_needed():
+    global _engine, _SessionLocal
+    if _engine is not None:
+        return
+
+    db_url = os.getenv("DATABASE_URL")
+    if not db_url:
+
+        raise RuntimeError("Missing env var: DATABASE_URL")
+
+    connect_args = {"sslmode": "require"} if "sslmode=" not in db_url else {}
+    _engine = create_engine(db_url, pool_pre_ping=True, connect_args=connect_args)
+    _SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
+
+
+    models.Base.metadata.create_all(bind=_engine)
+
+def get_db() -> Generator:
+    _init_db_if_needed()
+    db = _SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 
 app = FastAPI()
 
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://resrv.vercel.app/",
+    "https://resrv.vercel.app",   
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -18,8 +57,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router)
+@app.get("/")
+def root():
+    return {"msg": "Backend running successfully!"}
 
+@app.get("/favicon.ico")
+def favicon():
+    return {}, 204
+
+app.include_router(auth.router)
 
 def custom_openapi():
     if app.openapi_schema:
@@ -31,13 +77,8 @@ def custom_openapi():
         routes=app.routes,
     )
     openapi_schema["components"]["securitySchemes"] = {
-        "BearerAuth": {
-            "type": "http",
-            "scheme": "bearer",
-            "bearerFormat": "JWT",
-        }
+        "BearerAuth": {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}
     }
-
     for path in openapi_schema["paths"].values():
         for method in path.values():
             method.setdefault("security", [{"BearerAuth": []}])
