@@ -5,15 +5,16 @@ import CarouselSection from "../components/CarouselSection";
 import RestaurantCard from "../components/RestaurantCard";
 import restaurants from "../data/restaurants";
 import { useAppState } from "../context/AppState";
+import ChatRecommendPanel from "../components/ChatRecommendPanel"; 
 
 export default function HomePage() {
   const navigate = useNavigate();
   const { favoriteIds, isFavorite } = useAppState();
   const favoriteRestaurants = restaurants.filter(r => isFavorite(r.id));
-  
+
   return (
     <div className="max-w-7xl mx-auto px-4">
-      {/* 第一個區塊：我的收藏 */}
+
       {favoriteRestaurants.length > 0 ? (
         <CarouselSection title="我的收藏" restaurants={favoriteRestaurants} />
       ) : (
@@ -23,7 +24,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 第二個區塊：現在可訂位的熱門餐廳 */}
       <h2 className="text-2xl font-bold my-6">現在可訂位的熱門餐廳</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {restaurants.map((item) => (

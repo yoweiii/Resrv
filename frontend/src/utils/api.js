@@ -24,15 +24,22 @@ export async function api(path, { method = "GET", body, token, headers } = {}) {
 
 export const authApi = {
   register: (payload) =>
-    api("/auth/register", { method: "POST", body: payload }),
+    api("/api/auth/register", { method: "POST", body: payload }),
 
   login: async (payload) => {
-    const data = await api("/auth/login", { method: "POST", body: payload });
+    const data = await api("/api/auth/login", { method: "POST", body: payload });
     setToken(data.access_token); 
     return data;
   },
 
-  me: () => api("/auth/me"),
+  me: () => api("/api/auth/me"),
 
   logout: () => clearToken(),
 };
+
+export const chatApi = {
+  start: () => api("/api/chat/start", { method: "POST" }),
+  message: (session_id, message) =>
+    api("/api/chat/message", { method: "POST", body: { session_id, message } }),
+};
+

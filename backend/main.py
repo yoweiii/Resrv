@@ -1,17 +1,20 @@
+# backend/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 
 from database import Base, init_engine, get_engine
-import models
-import auth
+import models  # 確保 models 都被載入，create_all 才知道有哪些表
+from api.index import router as api_router
+from dotenv import load_dotenv
+load_dotenv()
 
 app = FastAPI()
 
 ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://resrv.vercel.app", 
+    "https://resrv.vercel.app",
 ]
 
 app.add_middleware(
@@ -23,7 +26,6 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-
 @app.get("/")
 def root():
     return {"msg": "Backend running successfully!"}
@@ -32,14 +34,14 @@ def root():
 def favicon():
     return {}, 204
 
-
 @app.on_event("startup")
 def on_startup():
     init_engine()
     Base.metadata.create_all(bind=get_engine())
+    print("Tables:", list(Base.metadata.tables.keys()))
 
-# Routers
-app.include_router(auth.router)
+# ✅ 統一由 api/index.py 集中管理所有 router
+app.include_router(api_router, prefix="/api")
 
 def custom_openapi():
     if app.openapi_schema:
